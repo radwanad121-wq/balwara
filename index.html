@@ -1,4 +1,340 @@
 <!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Balwara — Real answers, no speeches</title>
+<meta name="description" content="Balwara is an AI assistant specialised in Arab and African history, politics and general knowledge. English, Français, العربية.">
+<meta name="theme-color" content="#0d1017">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23d4a843'/%3E%3Crect x='28' y='12' width='8' height='16' rx='4' fill='%230d1017'/%3E%3Cpath d='M32 28v8M18 38h28l-4 16H22z' stroke='%230d1017' stroke-width='4' fill='%230d1017' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root{
+  --bg:#0d1017;--side:#10141d;--card:#161b26;--card2:#1b2130;--line:rgba(255,255,255,.08);--txt:#e9ebf1;--mut:#8c93a6;
+  --gold:#d4a843;--gold2:#f0cf7e;--ink:#0d1017;--user:#1f2636;--ok:#5fbf8f;
+  --ease:cubic-bezier(.22,1,.36,1);--serif:'Fraunces',Georgia,serif;
+}
+:root:not([data-theme="light"]){color-scheme:dark}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){--bg:#f7f6f2;--side:#efede6;--card:#fff;--card2:#f4f2ec;--line:rgba(13,16,23,.1);--txt:#141821;--mut:#646b7c;--user:#e9e6dc;--gold:#a87a14;--gold2:#8a6410;color-scheme:light}
+}
+:root[data-theme="light"]{--bg:#f7f6f2;--side:#efede6;--card:#fff;--card2:#f4f2ec;--line:rgba(13,16,23,.1);--txt:#141821;--mut:#646b7c;--user:#e9e6dc;--gold:#a87a14;--gold2:#8a6410;color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font:15.5px/1.7 Inter,'Noto Naskh Arabic',system-ui,sans-serif;overflow:hidden}
+[dir="rtl"] body,[dir="rtl"] button,[dir="rtl"] textarea{font-family:'Noto Naskh Arabic',Inter,system-ui,sans-serif}
+button,textarea{font:inherit;color:inherit}button{background:none;border:0;cursor:pointer}
+a{color:var(--gold2)}
+.app{display:flex;height:100dvh}
+
+aside{width:276px;flex-shrink:0;background:var(--side);border-inline-end:1px solid var(--line);display:flex;flex-direction:column;padding:16px 14px;gap:12px;transition:transform .35s var(--ease);z-index:30}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 6px 8px;font-family:var(--serif);font-weight:700;font-size:23px;letter-spacing:-.01em}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--gold);display:grid;place-items:center;flex-shrink:0}
+.logo svg{width:22px;height:22px}
+.new{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;transition:border-color .2s}
+.new:hover{border-color:var(--gold)}
+.lab{font-size:11.5px;color:var(--mut);padding:6px 6px 0;text-transform:uppercase;letter-spacing:.09em}
+[dir="rtl"] .lab{letter-spacing:0}
+.hist{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px;margin:0 -4px;padding:0 4px}
+.hi{display:flex;align-items:center;gap:6px;border-radius:10px;padding:9px 10px;font-size:14px;color:var(--mut);cursor:pointer}
+.hi span{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.hi:hover,.hi.on{background:var(--card);color:var(--txt)}
+.hi .x{opacity:0;width:22px;height:22px;border-radius:6px;font-size:13px;color:var(--mut)}
+.hi:hover .x{opacity:1}.hi .x:hover{color:var(--gold2)}
+.meter{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--mut);display:grid;gap:6px}
+.meter div{display:flex;justify-content:space-between;gap:8px}
+.meter b{color:var(--txt);font-variant-numeric:tabular-nums}
+.meter .bar{height:5px;border-radius:9px;background:var(--line);overflow:hidden}
+.meter .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .8s var(--ease)}
+.foot{display:flex;gap:6px;align-items:center;justify-content:space-between}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--card)}
+.seg button{font-size:12.5px;padding:4px 9px;border-radius:7px;color:var(--mut);font-weight:600}
+.seg button.on{background:var(--gold);color:var(--ink)}
+.ib{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:16px;color:var(--mut);border:1px solid var(--line);background:var(--card)}
+.ib:hover{color:var(--txt)}
+
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{display:none;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}
+.top .brand{padding:0;font-size:20px}
+.scroll{flex:1;overflow:auto}
+.col{width:min(800px,100% - 32px);margin:0 auto}
+#view{min-height:100%;display:flex;flex-direction:column}
+
+.hello{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 0 18px;gap:14px}
+.podium{width:84px;height:84px}
+.hello h1{font-family:var(--serif);font-weight:600;font-size:clamp(40px,6.5vw,64px);line-height:1.02;letter-spacing:-.02em}
+[dir="rtl"] .hello h1{font-family:'Noto Naskh Arabic',serif;letter-spacing:0;line-height:1.3}
+.hello h1 em{font-style:italic;color:var(--gold)}
+.hello p{color:var(--mut);max-width:520px;font-size:16px}
+.pill{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;border:1px solid var(--line);padding:5px 12px;border-radius:999px;color:var(--mut)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:16px;text-align:start}
+.chips button{text-align:start;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:13px 15px;font-size:14px;transition:border-color .2s,transform .2s;display:flex;flex-direction:column;gap:3px}
+.chips button small{color:var(--gold);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+[dir="rtl"] .chips button small{letter-spacing:0}
+.chips button:hover{border-color:var(--gold);transform:translateY(-2px)}
+@media(max-width:600px){.chips{grid-template-columns:1fr}}
+
+.msgs{display:flex;flex-direction:column;gap:24px;padding:28px 0 20px}
+.m{display:flex;gap:12px;animation:in .45s var(--ease) both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.m.u{justify-content:flex-end}
+.m.u .b{background:var(--user);padding:10px 16px;border-radius:18px;border-end-end-radius:4px;max-width:80%;white-space:pre-wrap;word-wrap:break-word}
+.av{width:32px;height:32px;border-radius:9px;background:var(--gold);display:grid;place-items:center;flex-shrink:0;margin-top:2px}
+.av svg{width:21px;height:21px}
+.m.a .b{flex:1;min-width:0;padding-top:4px}
+.b>*+*{margin-top:.75em}
+.b ul,.b ol{padding-inline-start:1.4em}.b li+li{margin-top:.25em}
+.b h1,.b h2,.b h3{font-family:var(--serif);line-height:1.3;font-size:1.15em;font-weight:600}
+[dir="rtl"] .b h1,[dir="rtl"] .b h2,[dir="rtl"] .b h3,.b[dir="rtl"] h1,.b[dir="rtl"] h2,.b[dir="rtl"] h3{font-family:'Noto Naskh Arabic',serif}
+.b strong{color:var(--gold2);font-weight:600}
+.b code{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.88em;font-family:ui-monospace,Menlo,monospace}
+.b pre{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto;direction:ltr}
+.b pre code{border:0;padding:0;background:none}
+.b table{border-collapse:collapse;display:block;overflow:auto;font-size:14px}.b th,.b td{border:1px solid var(--line);padding:7px 11px;text-align:start}.b th{background:var(--card)}
+.b blockquote{border-inline-start:3px solid var(--gold);padding-inline-start:12px;color:var(--mut)}
+.acts{display:flex;gap:4px;margin-top:10px}
+.acts button{font-size:12.5px;color:var(--mut);padding:4px 9px;border-radius:8px;border:1px solid transparent}
+.acts button:hover{border-color:var(--line);color:var(--txt)}
+.err{color:#e8826f}
+.wait{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:14px}
+.dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mut);margin-inline-end:4px;animation:d 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes d{30%{transform:translateY(-5px);background:var(--gold)}}
+
+.comp{padding:10px 0 calc(14px + env(safe-area-inset-bottom))}
+.box{display:flex;align-items:flex-end;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:8px;padding-inline-start:16px;transition:border-color .2s;box-shadow:0 12px 40px rgba(0,0,0,.16)}
+.box:focus-within{border-color:var(--gold)}
+.box textarea{flex:1;background:none;border:0;outline:0;resize:none;max-height:200px;padding:8px 0;line-height:1.5}
+.send{width:40px;height:40px;border-radius:12px;background:var(--gold);color:var(--ink);display:grid;place-items:center;flex-shrink:0;transition:opacity .2s}
+.send:disabled{opacity:.3;cursor:default}
+.send svg{width:18px;height:18px}
+.note{text-align:center;font-size:12px;color:var(--mut);margin-top:8px}
+
+.veil{display:none}
+@media(max-width:820px){
+  aside{position:fixed;inset-block:0;inset-inline-start:0;transform:translateX(-100%);box-shadow:20px 0 60px rgba(0,0,0,.4)}
+  [dir="rtl"] aside{transform:translateX(100%)}
+  aside.on,[dir="rtl"] aside.on{transform:none}
+  .veil.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
+  .top{display:flex}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="side">
+    <div class="brand"><span class="logo" data-ico></span>Balwara</div>
+    <button class="new" data-new>＋ <span data-t="new"></span></button>
+    <div class="lab" data-t="history"></div>
+    <div class="hist" id="hist"></div>
+    <div class="meter">
+      <div><span data-t="m1"></span><b>0</b></div>
+      <div><span data-t="m2"></span><b id="ans">0</b></div>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+    <div class="foot">
+      <div class="seg" id="langs"><button data-l="en">EN</button><button data-l="fr">FR</button><button data-l="ar">عربي</button></div>
+      <button class="ib" id="themeBtn" aria-label="Theme">◐</button>
+    </div>
+  </aside>
+  <div class="veil" id="veil"></div>
+
+  <main>
+    <div class="top">
+      <button class="ib" id="menuBtn" aria-label="Menu">☰</button>
+      <div class="brand"><span class="logo" data-ico></span>Balwara</div>
+      <button class="ib" data-new aria-label="New">＋</button>
+    </div>
+    <div class="scroll" id="scroll"><div class="col" id="view"></div></div>
+    <div class="col comp">
+      <form class="box" id="form">
+        <textarea id="inp" rows="1" dir="auto"></textarea>
+        <button class="send" id="send" aria-label="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      </form>
+      <p class="note" data-t="note"></p>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+const API='https://text.pollinations.ai/openai';
+const MODEL='openai';
+const API_KEY='';
+
+const ICO='<svg viewBox="0 0 24 24" fill="none"><rect x="10.2" y="2.5" width="3.6" height="7.5" rx="1.8" fill="#0d1017"/><path d="M12 10v3.2" stroke="#0d1017" stroke-width="1.6" stroke-linecap="round"/><path d="M6 13.5h12l-1.6 8H7.6z" fill="#0d1017"/><path d="M15.6 4.6c1 .5 1.6 1.4 1.6 2.4M17.6 3c1.5.8 2.4 2.3 2.4 4" stroke="#0d1017" stroke-width="1.4" stroke-linecap="round"/></svg>';
+const PODIUM='<svg class="podium" viewBox="0 0 120 120" fill="none"><rect x="6" y="6" width="108" height="108" rx="28" fill="var(--card)" stroke="var(--line)"/><rect x="52" y="22" width="16" height="30" rx="8" fill="var(--gold)"/><path d="M60 52v12" stroke="var(--gold)" stroke-width="4" stroke-linecap="round"/><path d="M34 66h52l-6 34H40z" fill="var(--gold)"/><circle cx="60" cy="82" r="6" fill="var(--card)"/><path d="M74 26c4 2 6.5 5.5 6.5 9.5M80 19c6 3.2 9.5 9 9.5 16.5M46 26c-4 2-6.5 5.5-6.5 9.5M40 19c-6 3.2-9.5 9-9.5 16.5" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" opacity=".7"/></svg>';
+
+const T={
+ en:{dir:'ltr',new:'New conversation',history:'History',empty:'No conversations yet',m1:'Empty promises made',m2:'Real answers given',
+   pill:'Online · English · Français · العربية',
+   h1:'All the eloquence.<br><em>None of the promises.</em>',
+   sub:'Ask about Arab and African history, politics, or anything else. Balwara gives straight answers, no three-hour speeches.',
+   ph:'Ask Balwara anything…',note:'Balwara can make mistakes. Verify important facts.',
+   think:'Drafting a speech… a short one, promise.',busy:'High demand. Next answer in {s}s…',
+   err:'Sorry, the connection failed. Please try again in a moment.',copy:'Copy',copied:'Copied',del:'Delete',
+   s:[['History','Why did the Almoravid empire rise so fast?'],['Politics','Explain the African Union in 5 key points'],['Biography','Who was Thomas Sankara and what is his legacy?'],['Knowledge','How did the Silk Road connect Africa and Asia?']]},
+ fr:{dir:'ltr',new:'Nouvelle discussion',history:'Historique',empty:'Aucune discussion',m1:'Promesses vides',m2:'Vraies réponses',
+   pill:'En ligne · English · Français · العربية',
+   h1:'Toute l\'éloquence.<br><em>Aucune promesse.</em>',
+   sub:'Posez vos questions sur l\'histoire et la politique du monde arabe et de l\'Afrique, ou sur tout autre sujet. Des réponses claires, pas des discours de trois heures.',
+   ph:'Demandez n\'importe quoi à Balwara…',note:'Balwara peut se tromper. Vérifiez les informations importantes.',
+   think:'Rédaction du discours… un court, promis.',busy:'Forte affluence. Prochaine réponse dans {s} s…',
+   err:'Désolé, la connexion a échoué. Réessayez dans un instant.',copy:'Copier',copied:'Copié',del:'Supprimer',
+   s:[['Histoire','Qu\'était le royaume du Mali sous Mansa Moussa ?'],['Politique','Les indépendances africaines expliquées simplement'],['Biographie','Qui était Abdelkrim el-Khattabi ?'],['Culture','Pourquoi l\'Andalousie a-t-elle été un centre du savoir ?']]},
+ ar:{dir:'rtl',new:'محادثة جديدة',history:'السجل',empty:'لا توجد محادثات بعد',m1:'وعود فارغة',m2:'إجابات حقيقية',
+   pill:'متصل · العربية · Français · English',
+   h1:'كل البلاغة.<br><em>بلا أي وعود.</em>',
+   sub:'اسأل عن تاريخ العالم العربي وإفريقيا وسياستهما، أو عن أي موضوع آخر. بلوارة يجيب بوضوح، بلا خطابات من ثلاث ساعات.',
+   ph:'اسأل بلوارة عن أي شيء…',note:'قد يخطئ بلوارة. تحقّق من المعلومات المهمة.',
+   think:'جارٍ إعداد الخطاب… خطاب قصير، أعدك.',busy:'ضغط كبير. الإجابة التالية خلال {s} ثانية…',
+   err:'عذرًا، فشل الاتصال. حاول مرة أخرى بعد قليل.',copy:'نسخ',copied:'تم النسخ',del:'حذف',
+   s:[['تاريخ','ما أسباب سقوط الأندلس؟'],['سياسة','اشرح لي نشأة جامعة الدول العربية وأهدافها'],['شخصيات','من هو ابن خلدون وما أهم أفكاره؟'],['معرفة','كيف أثّرت تجارة القوافل عبر الصحراء في إفريقيا؟']]}
+};
+
+const SYSTEM=lang=>`You are Balwara, an AI assistant with the depth of a senior historian and political analyst. Your name is a tongue-in-cheek reference to long, empty political speeches: your job is the opposite, precise and substantive answers.
+
+Expertise (be especially strong here):
+- History of the Arab world and Africa: pre-Islamic and Islamic eras, the caliphates, al-Andalus, the Maghreb dynasties (Idrisids, Almoravids, Almohads, Marinids, Saadians, Alaouites), the Ottomans, Egypt from the pharaohs to today, the Sahel empires (Ghana, Mali, Songhai, Kanem-Bornu), East and Southern Africa (Aksum, Swahili coast, Great Zimbabwe, Zulu), trans-Saharan trade, colonisation, resistance movements, independences, and the post-colonial era.
+- Politics: political systems, constitutions, parties and institutions of Arab and African states, the Arab League, the African Union, ECOWAS, the Arab Spring, conflicts, geopolitics, economics and development.
+- Key figures: rulers, thinkers, scholars and leaders (e.g. Ibn Khaldun, Ibn Battuta, Mansa Musa, Abdelkrim el-Khattabi, Nasser, Nkrumah, Lumumba, Mandela, Sankara).
+- General knowledge: science, culture, religion as history, economy, geography, languages, practical questions, writing and code. Help with anything.
+
+How to answer:
+- Accuracy first. Give dates, names, places and context. Distinguish established facts from interpretations, and mention when historians disagree. Never invent sources, quotes or numbers; if unsure, say so plainly.
+- On contested or current political topics, stay strictly neutral: present the main positions fairly and do not take sides or endorse parties or politicians.
+- Structure: start with a direct 1-2 sentence answer, then the essential detail using Markdown (short headings, bullet points, tables for comparisons or timelines). Be thorough but never padded.
+- Personality: professional and confident, with dry wit. Very occasionally, a light self-aware joke about long political speeches is welcome, but never at the expense of the answer and never mocking a specific real person.
+
+Language rules (strict):
+- You only reply in Modern Standard Arabic (فصحى), French, or English.
+- If the user writes in Arabic script or in any Arabic dialect (including Moroccan Darija written in Latin letters), reply in correct, elegant Modern Standard Arabic.
+- If the user writes in French, reply in French. If in English, reply in English.
+- For any other language, reply in ${lang==='fr'?'French':lang==='ar'?'Modern Standard Arabic':'English'}.
+- Never reply in a dialect.
+
+If asked who you are: you are Balwara, an AI assistant specialised in Arab and African history, politics and general knowledge.`;
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const view=$('#view'),scroll=$('#scroll'),inp=$('#inp'),send=$('#send'),hist=$('#hist');
+$$('[data-ico]').forEach(e=>e.innerHTML=ICO);
+
+const get=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}};
+const put=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+let chats=[];try{chats=JSON.parse(get('balwara_chats_v2','[]'))||[]}catch(e){chats=[]}
+const save=()=>put('balwara_chats_v2',JSON.stringify(chats.slice(0,40)));
+let cur=null,busy=false,ctrl=null,answers=+get('balwara_answers','0')||0;
+let lang=get('balwara_lang','');if(!T[lang]){const n=(navigator.language||'en').slice(0,2);lang=T[n]?n:'en'}
+const t=k=>T[lang][k];
+
+const th=get('balwara_theme','');if(th)document.documentElement.dataset.theme=th;
+$('#themeBtn').onclick=()=>{const d=document.documentElement;const dark=d.dataset.theme?d.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;d.dataset.theme=dark?'light':'dark';put('balwara_theme',d.dataset.theme)};
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function md(x){try{if(window.marked&&window.DOMPurify)return DOMPurify.sanitize(marked.parse(x,{breaks:true}))}catch(e){}return esc(x).replace(/\n/g,'<br>')}
+
+function meter(){$('#ans').textContent=answers;$('#bar').style.width=Math.min(100,8+answers*4)+'%'}
+function applyLang(){
+  const D=document.documentElement;D.lang=lang;D.dir=t('dir');
+  $$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+  inp.placeholder=t('ph');
+  $$('#langs button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
+  renderHist();render();
+}
+$$('#langs button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;put('balwara_lang',lang);applyLang()});
+
+function renderHist(){
+  hist.innerHTML=chats.length?'':`<div class="hi" style="cursor:default"><span>${esc(t('empty'))}</span></div>`;
+  chats.forEach(c=>{const d=document.createElement('div');d.className='hi'+(c===cur?' on':'');d.innerHTML=`<span dir="auto">${esc(c.title)}</span><button class="x" title="${esc(t('del'))}">✕</button>`;
+    d.onclick=e=>{if(e.target.classList.contains('x')){chats=chats.filter(x=>x!==c);if(cur===c)cur=null;save();renderHist();render();return}cur=c;closeSide();renderHist();render()};
+    hist.appendChild(d)});
+}
+const side=$('#side'),veil=$('#veil');
+function closeSide(){side.classList.remove('on');veil.classList.remove('on')}
+$('#menuBtn').onclick=()=>{side.classList.add('on');veil.classList.add('on')};veil.onclick=closeSide;
+$$('[data-new]').forEach(b=>b.onclick=()=>{if(busy&&ctrl)ctrl.abort();cur=null;closeSide();renderHist();render();inp.focus()});
+
+function welcome(){
+  view.innerHTML=`<div class="hello">${PODIUM}
+    <span class="pill"><i></i>${esc(t('pill'))}</span>
+    <h1>${t('h1')}</h1><p>${esc(t('sub'))}</p>
+    <div class="chips">${t('s').map(([k,q])=>`<button data-q="${esc(q)}"><small>${esc(k)}</small><span>${esc(q)}</span></button>`).join('')}</div></div>`;
+  $$('.chips button').forEach(b=>b.onclick=()=>ask(b.dataset.q));
+}
+function msgEl(role,content){
+  const d=document.createElement('div');d.className='m '+(role==='user'?'u':'a');
+  d.innerHTML=role==='user'?`<div class="b" dir="auto">${esc(content)}</div>`:`<span class="av">${ICO}</span><div class="b" dir="auto">${md(content)}</div>`;
+  return d;
+}
+function addActs(el,text){
+  const a=document.createElement('div');a.className='acts';a.innerHTML=`<button>⧉ ${esc(t('copy'))}</button>`;
+  const b=a.firstChild;b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(text);b.textContent='✓ '+t('copied');setTimeout(()=>b.textContent='⧉ '+t('copy'),1500)};
+  el.querySelector('.b').appendChild(a);
+}
+function render(){
+  if(!cur||!cur.msgs.length){welcome();return}
+  view.innerHTML='<div class="msgs" id="msgs"></div>';const box=$('#msgs');
+  cur.msgs.forEach(m=>{const e=msgEl(m.role,m.content);box.appendChild(e);if(m.role==='assistant')addActs(e,m.content)});
+  scroll.scrollTop=scroll.scrollHeight;
+}
+const bottom=()=>{scroll.scrollTop=scroll.scrollHeight};
+const sleep=(ms,signal)=>new Promise((res,rej)=>{const id=setTimeout(res,ms);signal&&signal.addEventListener('abort',()=>{clearTimeout(id);rej(new DOMException('','AbortError'))})});
+
+async function ask(q){
+  q=q.trim();if(!q||busy)return;
+  if(!cur){cur={id:Date.now(),title:q.slice(0,50),msgs:[]};chats.unshift(cur)}else chats=[cur,...chats.filter(c=>c!==cur)];
+  cur.msgs.push({role:'user',content:q});save();renderHist();render();
+  const el=document.createElement('div');el.className='m a';el.innerHTML=`<span class="av">${ICO}</span><div class="b"><div class="wait"><span class="dots"><span></span><span></span><span></span></span><span class="st">${esc(t('think'))}</span></div></div>`;
+  $('#msgs').appendChild(el);bottom();
+  const status=s=>{const st=el.querySelector('.st');if(st)st.textContent=s};
+  busy=true;setSend();const chat=cur;ctrl=new AbortController();
+  const history=chat.msgs.slice(-16).map(m=>({role:m.role,content:m.content}));
+  let text;
+  try{text=await callAI(history,ctrl.signal,status)}
+  catch(e){busy=false;setSend();if(e.name==='AbortError')return;el.querySelector('.b').innerHTML=`<span class="err">${esc(t('err'))}</span>`;return}
+  chat.msgs.push({role:'assistant',content:text});save();answers++;put('balwara_answers',answers);meter();
+  if(chat===cur){await typeOut(el.querySelector('.b'),text);addActs(el,text)}
+  busy=false;setSend();
+}
+async function callAI(messages,signal,status){
+  for(let i=0;i<5;i++){
+    const headers={'Content-Type':'application/json'};if(API_KEY)headers.Authorization='Bearer '+API_KEY;
+    let r;
+    try{r=await fetch(API,{method:'POST',signal,headers,body:JSON.stringify({model:MODEL,messages:[{role:'system',content:SYSTEM(lang)},...messages]})})}
+    catch(e){if(e.name==='AbortError'||i>=2)throw e;await sleep(1500,signal);continue}
+    if(r.status===402||r.status===429){
+      let wait=30;try{const j=await r.json();const m=/(\d+)\s*s/.exec(j&&j.error&&j.error.message||'');if(m)wait=+m[1]+1}catch(e){}
+      for(let s=wait;s>0;s--){status(t('busy').replace('{s}',s));await sleep(1000,signal)}
+      status(t('think'));continue;
+    }
+    if(!r.ok){if(i>=2)throw new Error('HTTP '+r.status);await sleep(1500,signal);continue}
+    const j=await r.json();const c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+    if(c&&c.trim())return c.trim();
+    if(i>=2)throw new Error('empty');
+  }
+  throw new Error('retries');
+}
+function typeOut(b,text){
+  return new Promise(res=>{const w=text.split(/(\s+)/);let i=0;const step=Math.max(1,Math.ceil(w.length/110));
+    (function tick(){i=Math.min(w.length,i+step);b.innerHTML=md(w.slice(0,i).join(''));
+      if(scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<160)bottom();
+      i<w.length?setTimeout(tick,16):res()})()});
+}
+function setSend(){send.disabled=busy||!inp.value.trim()}
+inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(200,inp.scrollHeight)+'px';setSend()});
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('#form').requestSubmit()}});
+$('#form').onsubmit=e=>{e.preventDefault();const v=inp.value;if(!v.trim()||busy)return;inp.value='';inp.style.height='auto';setSend();ask(v)};
+
+meter();applyLang();inp.focus();
+})();
+</script>
+</body>
+</html>
+<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
